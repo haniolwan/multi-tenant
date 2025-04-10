@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id         Int       @id @default(autoincrement())
+  name       String
+  slug       String    @unique
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  password   String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+  role       Role?     @default(VIEWER)
+  posts      Post[]
+  comments   Comment[]
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+}
+
+model Post {
+  id           Int       @id @default(autoincrement())
+  title        String    @unique
+  content      String
+  author_id    Int
+  author       User      @relation(fields: [author_id], references: [id]) // Foreign key for User
+  published    Boolean   @default(true)
+  published_at DateTime  @default(now())
+  created_at   DateTime? @default(now())
+  updated_at   DateTime? @updatedAt
+  Comment      Comment[]
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  content    String
+  post_id    Int
+  post       Post     @relation(fields: [post_id], references: [id]) // Foreign key for Post
+  author_id  Int
+  author     User     @relation(fields: [author_id], references: [id]) // Foreign key for User
+  parent_id  String?
+  likes      Int?     @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
