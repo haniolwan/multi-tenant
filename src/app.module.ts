@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -8,6 +13,7 @@ import { UserModule } from './user/user.module';
 import { TenantModule } from './tenant/tenant.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { TenantMiddleware } from 'prisma/middleware/tenant-middleware';
 
 @Module({
   imports: [
@@ -18,11 +24,11 @@ import { APP_GUARD } from '@nestjs/core';
         limit: 10,
       },
     ]),
+    TenantModule,
     PrismaModule,
     AuthModule,
     PostModule,
     UserModule,
-    TenantModule,
   ],
   controllers: [AppController],
   providers: [
@@ -34,4 +40,11 @@ import { APP_GUARD } from '@nestjs/core';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      .exclude({ path: 'tenant/*', method: RequestMethod.ALL })
+      .forRoutes('*');
+  }
+}

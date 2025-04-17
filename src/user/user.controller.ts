@@ -20,7 +20,6 @@ import {
 } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
-// import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthEntity } from 'src/auth/entities/auth.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';

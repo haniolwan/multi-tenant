@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateTenantDto {
   @IsString()
@@ -18,14 +12,4 @@ export class CreateTenantDto {
   @IsNotEmpty()
   @ApiProperty()
   slug: string;
-
-  //   @IsInt()
-  //   @IsNotEmpty()
-  //   @ApiProperty()
-  //   owner_id: number;
-
-  @IsOptional()
-  @IsInt({ each: true })
-  @ApiProperty({ required: false, type: [Number] })
-  user_ids: number[] | null;
 }

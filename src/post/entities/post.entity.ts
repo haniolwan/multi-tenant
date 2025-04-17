@@ -19,6 +19,9 @@ export class PostEntity implements Post {
   author_id: number;
 
   @ApiProperty()
+  tenantId: number;
+
+  @ApiProperty()
   published_at: Date;
 
   @ApiProperty()

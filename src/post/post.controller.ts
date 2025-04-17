@@ -44,7 +44,12 @@ export class PostController {
   ) {
     const user = req.user;
     return new PostEntity(
-      await this.postService.create(createPostDto, user.id, user.role),
+      await this.postService.create(
+        user.tenantId,
+        createPostDto,
+        user.id,
+        user.role,
+      ),
     );
   }
 
@@ -57,12 +62,17 @@ export class PostController {
     @Query() findPostsDto: FindPostsDto,
     @Request() req: AuthRequest,
   ) {
-    const user = req.user;
-    const posts = await this.postService.findAll(user.id, findPostsDto);
-    return posts.map((post) => new PostEntity({ ...post, author_id: user.id }));
+    const { id: userId, tenantId } = req.user;
+    const posts = await this.postService.findAll(
+      tenantId,
+      userId,
+      findPostsDto,
+    );
+    return posts.map((post) => new PostEntity({ ...post, author_id: userId }));
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get post id' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: PostEntity })
@@ -71,7 +81,7 @@ export class PostController {
     @Request() req: AuthRequest,
   ) {
     const user = req.user;
-    const post = await this.postService.findOne(+id);
+    const post = await this.postService.findOne(user.tenantId, +id);
     if (!post) {
       throw new NotFoundException(`Post with ${id} does not exist.`);
     }
@@ -79,6 +89,7 @@ export class PostController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Edit post id' })
   @UseGuards(JwtAuthGuard, AdminGuard, EditorGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: PostEntity })
@@ -89,11 +100,18 @@ export class PostController {
   ) {
     const user = req.user;
     return new PostEntity(
-      await this.postService.update(+id, updatePostDto, user.id, user.role),
+      await this.postService.update(
+        user.tenantId,
+        +id,
+        updatePostDto,
+        user.id,
+        user.role,
+      ),
     );
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete post id' })
   @UseGuards(JwtAuthGuard, AdminGuard, EditorGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: PostEntity })
@@ -103,7 +121,7 @@ export class PostController {
   ) {
     const user = req.user;
     return new PostEntity(
-      await this.postService.remove(+id, user.id, user.role),
+      await this.postService.remove(user.tenantId, +id, user.id, user.role),
     );
   }
 }

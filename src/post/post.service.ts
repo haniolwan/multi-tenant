@@ -41,14 +41,19 @@ export class PostService {
     );
   }
 
-  create(createPostDto: CreatePostDto, authorId: number, userRole: Role) {
+  create(
+    tenantId: number,
+    createPostDto: CreatePostDto,
+    authorId: number,
+    userRole: Role,
+  ) {
     if (userRole !== Role.EDITOR && userRole !== Role.ADMIN) {
       throw new ForbiddenException(
         'You do not have permission to edit this post.',
       );
     }
     return this.prisma.post.create({
-      data: { ...createPostDto, author_id: authorId },
+      data: { tenantId: tenantId, ...createPostDto, author_id: authorId },
     });
   }
 
@@ -78,6 +83,7 @@ export class PostService {
 
   async findAll(
     userId: number,
+    tenantId: number,
     {
       page,
       pageSize,
@@ -92,8 +98,9 @@ export class PostService {
       title,
       published,
     );
+    console.log(where);
     return await this.prisma.post.findMany({
-      where,
+      where: { tenantId: tenantId, ...where },
       skip,
       take: Number(pageSize),
     });
@@ -137,25 +144,29 @@ export class PostService {
     return this.prisma.post.findMany({ where, skip, take: Number(pageSize) });
   }
 
-  findOne(id: number) {
+  findOne(tenantId: number, id: number) {
     return this.prisma.post.findUnique({
-      where: { id },
+      where: { tenantId: tenantId, id },
       include: { author: true },
     });
   }
 
   async update(
+    tenantId: number,
     id: number,
     updatePostDto: UpdatePostDto,
     userId: number,
     userRole: Role,
   ) {
     await this.userHasPermission(id, userId, userRole);
-    return this.prisma.post.update({ where: { id }, data: updatePostDto });
+    return this.prisma.post.update({
+      where: { tenantId: tenantId, id },
+      data: updatePostDto,
+    });
   }
 
-  async remove(id: number, userId: number, userRole: Role) {
+  async remove(tenantId: number, id: number, userId: number, userRole: Role) {
     await this.userHasPermission(id, userId, userRole);
-    return this.prisma.post.delete({ where: { id } });
+    return this.prisma.post.delete({ where: { tenantId: tenantId, id } });
   }
 }

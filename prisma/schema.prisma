@@ -19,6 +19,8 @@ model Tenant {
   slug       String    @unique
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
+  User       User[]
+  Comment    Comment[]
 }
 
 enum Role {
@@ -37,6 +39,8 @@ model User {
   role       Role?     @default(VIEWER)
   posts      Post[]
   comments   Comment[]
+  Tenant     Tenant?   @relation(fields: [tenantId], references: [id])
+  tenantId   Int?
 }
 
 enum Status {
@@ -55,6 +59,7 @@ model Post {
   created_at   DateTime? @default(now())
   updated_at   DateTime? @updatedAt
   Comment      Comment[]
+  tenantId     Int
 }
 
 model Comment {
@@ -68,4 +73,6 @@ model Comment {
   likes      Int?     @default(0)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  tenantId   Int
+  Tenant     Tenant   @relation(fields: [tenantId], references: [id])
 }

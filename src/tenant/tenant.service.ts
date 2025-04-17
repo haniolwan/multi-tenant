@@ -7,6 +7,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class TenantService {
   constructor(private prisma: PrismaService) {}
 
+  findAll() {
+    return this.prisma.tenant.findMany();
+  }
+
+  findOne(id: number) {
+    return this.prisma.tenant.findUnique({ where: { id } });
+  }
+
   create(createTenantDto: CreateTenantDto) {
     return this.prisma.tenant.create({
       data: createTenantDto,
