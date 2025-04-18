@@ -14,8 +14,8 @@ A backend API built with NestJS, PostgreSQL, and Prisma. Supports multi-tenant a
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/multi-tenant-api.git
-cd multi-tenant-api
+git clone https://github.com/haniolwan/multi-tenant
+cd multi-tenant
 ```
 
 ### 2. Set up environment variables
@@ -23,7 +23,7 @@ cd multi-tenant-api
 Create a .env file in the project root based on .env.example.
 
 ```bash
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/multitenantdb?schema=public
+DATABASE_URL="postgresql://root:password@localhost:5432/mydb?schema=public"
 JWT_SECRET=your_jwt_secret_key
 PORT=3000
 ```
