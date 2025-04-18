@@ -58,7 +58,6 @@ export class PostService {
   }
 
   filterPosts(
-    userId: number,
     page: string,
     pageSize: string,
     title?: string,
@@ -66,7 +65,7 @@ export class PostService {
   ) {
     const skip = (Number(page) - 1) * Number(pageSize);
 
-    const where: Prisma.PostWhereInput = { author_id: userId };
+    const where: Prisma.PostWhereInput = {};
 
     if (title) {
       where.title = { contains: title, mode: 'insensitive' };
@@ -75,6 +74,7 @@ export class PostService {
     if (published !== undefined) {
       where.published = published === 'true';
     }
+
     return {
       skip,
       where,
@@ -82,7 +82,6 @@ export class PostService {
   }
 
   async findAll(
-    userId: number,
     tenantId: number,
     {
       page,
@@ -91,19 +90,15 @@ export class PostService {
       published,
     }: { page: string; pageSize: string; title?: string; published?: string },
   ) {
-    const { skip, where } = this.filterPosts(
-      userId,
-      page,
-      pageSize,
-      title,
-      published,
-    );
-    console.log(where);
-    return await this.prisma.post.findMany({
+    const { skip, where } = this.filterPosts(page, pageSize, title, published);
+    const posts = await this.prisma.post.findMany({
       where: { tenantId: tenantId, ...where },
       skip,
       take: Number(pageSize),
     });
+    console.log(posts);
+
+    return posts;
   }
 
   findDrafts(
@@ -115,13 +110,7 @@ export class PostService {
       published = 'false',
     }: { page: string; pageSize: string; title?: string; published?: string },
   ) {
-    const { skip, where } = this.filterPosts(
-      userId,
-      page,
-      pageSize,
-      title,
-      published,
-    );
+    const { skip, where } = this.filterPosts(page, pageSize, title, published);
     return this.prisma.post.findMany({ where, skip, take: Number(pageSize) });
   }
 
@@ -134,13 +123,7 @@ export class PostService {
       published = 'true',
     }: { page: string; pageSize: string; title?: string; published?: string },
   ) {
-    const { skip, where } = this.filterPosts(
-      userId,
-      page,
-      pageSize,
-      title,
-      published,
-    );
+    const { skip, where } = this.filterPosts(page, pageSize, title, published);
     return this.prisma.post.findMany({ where, skip, take: Number(pageSize) });
   }
 

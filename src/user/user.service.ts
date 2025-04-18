@@ -21,9 +21,19 @@ export class UserService {
     return this.prisma.user.create({ data: createUserDto });
   }
 
-  async register(name: string, email: string, password: string) {
+  async register(
+    tenantId: number,
+    name: string,
+    email: string,
+    password: string,
+  ) {
     const existingUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: {
+        tenantId_email: {
+          tenantId,
+          email,
+        },
+      },
     });
 
     if (existingUser) {
@@ -41,25 +51,28 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  findAll(tenantId: number | undefined) {
+    return this.prisma.user.findMany({ where: { tenantId } });
   }
 
-  findOne(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+  findOne(tenantId: number, id: number) {
+    return this.prisma.user.findUnique({ where: { tenantId: tenantId, id } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(tenantId: number, id: number, updateUserDto: UpdateUserDto) {
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(
         updateUserDto.password,
         roundsOfHashing,
       );
     }
-    return this.prisma.user.update({ where: { id }, data: updateUserDto });
+    return this.prisma.user.update({
+      where: { tenantId: tenantId, id },
+      data: updateUserDto,
+    });
   }
 
-  remove(id: number) {
-    return this.prisma.user.delete({ where: { id } });
+  remove(tenantId: number, id: number) {
+    return this.prisma.user.delete({ where: { tenantId: tenantId, id } });
   }
 }

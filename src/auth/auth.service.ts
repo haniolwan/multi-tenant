@@ -16,8 +16,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(email: string, password: string): Promise<AuthEntity> {
-    const user = await this.prisma.user.findUnique({ where: { email: email } });
+  async login(
+    email: string,
+    password: string,
+    tenantId: number,
+  ): Promise<AuthEntity> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        tenantId_email: {
+          tenantId,
+          email,
+        },
+      },
+    });
 
     if (!user) {
       throw new NotFoundException(`No user found for email: ${email}`);

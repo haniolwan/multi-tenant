@@ -13,8 +13,29 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   const config = new DocumentBuilder()
     .setTitle('Multi-Tenant API System')
-    .addBearerAuth()
+    .setDescription(
+      'A scalable multi-tenant API with JWT and Tenant ID support',
+    )
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+      },
+      'JWT-auth', // security name
+    )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-tenant-id',
+        in: 'header',
+      },
+      'tenant-id', // security name
+    )
     .build();
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 

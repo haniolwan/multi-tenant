@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
+
 const jwtSecret = process.env.JWT_SECRET || '';
 
 interface CustomJwtPayload extends jwt.JwtPayload {
@@ -16,29 +17,34 @@ interface CustomJwtPayload extends jwt.JwtPayload {
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log('TenantMiddleware running for route:', req.originalUrl);
+    let tenantId: string | undefined;
 
-    const host = req.headers.host; // e.g., tenant1.localhost:3000
-    const subdomain = host?.split('.')[0];
-    let tenantId: string | undefined = req.params.tenantId;
+    if (req.headers['x-tenant-id']) {
+      tenantId = req.headers['x-tenant-id'] as string;
+    } else if (req.headers.host) {
+      const host = req.headers.host; // e.g., tenant1.localhost:3000
+      const subdomain = host.split('.')[0];
+      if (subdomain && subdomain !== 'localhost') {
+        tenantId = subdomain;
+      }
+    }
 
-    if (subdomain && subdomain !== 'localhost') {
-      tenantId = subdomain;
-    } else {
-      // If no subdomain, fallback to JWT
+    // If still no tenantId, try JWT token
+    if (!tenantId && req.headers.authorization) {
       const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
+      if (authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
         try {
           const decoded = jwt.verify(token, jwtSecret) as CustomJwtPayload;
           tenantId = decoded.tenantId;
         } catch (err) {
-          console.log(err);
+          console.error(err);
           throw new UnauthorizedException('Invalid token');
         }
       }
     }
 
+    // if no tenantId resolved, throw error
     if (!tenantId) {
       throw new UnauthorizedException('Tenant ID could not be resolved');
     }

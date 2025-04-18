@@ -28,7 +28,12 @@ async function main(): Promise<void> {
 
   // Create Users First
   const admin1 = await prisma.user.upsert({
-    where: { email: 'admin@admin.com' },
+    where: {
+      tenantId_email: {
+        tenantId: tenant1.id,
+        email: 'admin@admin.com',
+      },
+    },
     update: {
       password: hashedPassword,
     },
@@ -42,7 +47,12 @@ async function main(): Promise<void> {
   });
 
   const admin2 = await prisma.user.upsert({
-    where: { email: 'admin@admin.com' },
+    where: {
+      tenantId_email: {
+        tenantId: tenant2.id,
+        email: 'admin@admin.com',
+      },
+    },
     update: {
       password: hashedPassword,
     },
@@ -57,7 +67,12 @@ async function main(): Promise<void> {
 
   // Create Editors for tenants
   const editor1 = await prisma.user.upsert({
-    where: { email: 'editor@editor.com' },
+    where: {
+      tenantId_email: {
+        tenantId: tenant1.id,
+        email: 'editor@editor.com',
+      },
+    },
     update: {
       password: hashedPassword,
     },
@@ -72,7 +87,12 @@ async function main(): Promise<void> {
 
   // Create Editors for tenants
   const editor2 = await prisma.user.upsert({
-    where: { email: 'editor@editor.com' },
+    where: {
+      tenantId_email: {
+        tenantId: tenant2.id,
+        email: 'editor@editor.com',
+      },
+    },
     update: {
       password: hashedPassword,
     },
@@ -86,7 +106,12 @@ async function main(): Promise<void> {
   });
 
   const viewer1 = await prisma.user.upsert({
-    where: { email: 'viewer@viewer.com' },
+    where: {
+      tenantId_email: {
+        tenantId: tenant1.id,
+        email: 'viewer@viewer.com',
+      },
+    },
     update: {
       password: hashedPassword,
     },
@@ -100,7 +125,12 @@ async function main(): Promise<void> {
   });
 
   const viewer2 = await prisma.user.upsert({
-    where: { email: 'viewer@viewer.com' },
+    where: {
+      tenantId_email: {
+        tenantId: tenant2.id,
+        email: 'viewer@viewer.com',
+      },
+    },
     update: {
       password: hashedPassword,
     },

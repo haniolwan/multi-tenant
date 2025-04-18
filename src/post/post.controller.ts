@@ -28,6 +28,7 @@ import { AuthRequest } from 'src/types/express';
 import { EditorGuard } from 'src/auth/guards/editor.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { FindPostsDto } from './dto/find-post.dto';
+import { ApiAuthWithTenant } from 'src/decorators/api-auth-with-tenant.decorator';
 
 @ApiTags('posts')
 @Controller('post')
@@ -35,6 +36,7 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
+  @ApiAuthWithTenant()
   @UseGuards(JwtAuthGuard, EditorGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: PostEntity })
@@ -54,6 +56,7 @@ export class PostController {
   }
 
   @Get()
+  @ApiAuthWithTenant()
   @ApiOperation({ summary: 'Get all posts with pagination and filtering' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -63,15 +66,13 @@ export class PostController {
     @Request() req: AuthRequest,
   ) {
     const { id: userId, tenantId } = req.user;
-    const posts = await this.postService.findAll(
-      tenantId,
-      userId,
-      findPostsDto,
-    );
+    const posts = await this.postService.findAll(tenantId, findPostsDto);
+
     return posts.map((post) => new PostEntity({ ...post, author_id: userId }));
   }
 
   @Get(':id')
+  @ApiAuthWithTenant()
   @ApiOperation({ summary: 'Get post id' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -89,6 +90,7 @@ export class PostController {
   }
 
   @Patch(':id')
+  @ApiAuthWithTenant()
   @ApiOperation({ summary: 'Edit post id' })
   @UseGuards(JwtAuthGuard, AdminGuard, EditorGuard)
   @ApiBearerAuth()
@@ -111,6 +113,7 @@ export class PostController {
   }
 
   @Delete(':id')
+  @ApiAuthWithTenant()
   @ApiOperation({ summary: 'Delete post id' })
   @UseGuards(JwtAuthGuard, AdminGuard, EditorGuard)
   @ApiBearerAuth()
